@@ -1,0 +1,22 @@
+name = "translation-proxy-worker"
+main = "worker.js"
+compatibility_date = "2024-10-24"
+
+# KV namespace binding for cache storage
+kv_namespaces = [
+  { binding = "TRANSLATION_CACHE", id = "1c6d2742747544468192eb6b41726c14" }
+]
+
+# Environment variables (set via wrangler secret)
+[vars]
+GEMINI_MODEL = "gemini-2.5-flash"
+ALLOWED_ORIGINS = "*"
+
+# Secrets (set with: wrangler secret put GOOGLE_API_KEY)
+# GOOGLE_API_KEY = "set via wrangler secret"
+
+[build]
+command = ""
+
+[build.upload]
+format = "service-worker"
