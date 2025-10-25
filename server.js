@@ -168,7 +168,9 @@ Translated text:`;
       },
     });
 
-    return result.response.text().trim();
+    const translatedText = result.response.text().trim();
+    console.log("Raw Gemini response:", JSON.stringify(translatedText)); // Debug
+    return translatedText;
   } catch (error) {
     console.error("Translation error:", error);
     throw new Error(`Translation failed: ${error.message}`);
@@ -276,11 +278,13 @@ app.post("/translate", async (req, res) => {
 
     // Translate using Gemini
     console.log(`Translating from ${detectedSourceLang} to ${targetLang}...`);
+    console.log("Original text:", JSON.stringify(normalizedText)); // Debug
     const translation = await translateText(
       normalizedText,
       detectedSourceLang,
       targetLang
     );
+    console.log("Translated text:", JSON.stringify(translation)); // Debug
 
     // Store in cache
     translationCache.set(cacheKey, {
