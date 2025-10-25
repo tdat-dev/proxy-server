@@ -86,9 +86,14 @@ function generateCacheKey(text, sourceLang, targetLang, provider) {
   return crypto.createHash("sha1").update(data).digest("hex");
 }
 
-// Utility: Clean and normalize text
+// Utility: Clean and normalize text (preserve line breaks)
 function normalizeText(text) {
-  return text.trim().replace(/\s+/g, " ");
+  // Only trim and normalize spaces within lines, but keep line breaks
+  return text
+    .split("\n")
+    .map((line) => line.trim().replace(/\s+/g, " "))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n"); // Max 2 consecutive line breaks
 }
 
 // Utility: Detect language using Gemini
@@ -137,12 +142,16 @@ async function translateText(text, sourceLang, targetLang) {
     const systemPrompt = `You are a professional translation engine. Translate the given text from ${sourceLangName} to ${targetLangName}.
 
 CRITICAL RULES:
-1. Preserve ALL formatting: code blocks (\`\`\`), HTML tags, markdown, line breaks
-2. Keep emojis and special characters unchanged
-3. Do NOT add explanations, notes, or extra text
-4. Return ONLY the translated text
-5. If text contains code, translate only comments and strings, not code syntax
-6. Maintain the same tone and style`;
+1. PRESERVE ALL line breaks exactly as they appear in the original text
+2. Keep ALL formatting: code blocks (\`\`\`), HTML tags, markdown
+3. Keep emojis and special characters unchanged
+4. Do NOT add explanations, notes, or extra text
+5. Return ONLY the translated text with same line structure
+6. If text contains code, translate only comments and strings, not code syntax
+7. Each line in original = each line in translation
+8. Maintain the same tone and style
+
+IMPORTANT: If the original text has multiple lines, your translation MUST have the same number of lines.`;
 
     const prompt = `${systemPrompt}
 
