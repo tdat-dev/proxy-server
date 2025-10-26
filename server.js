@@ -350,6 +350,21 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Keep-alive: Prevent Render.com cold start by pinging itself every 10 minutes
+function keepAlive() {
+  const url = process.env.SELF_URL || `http://localhost:${PORT}`;
+  if (process.env.NODE_ENV === "production" && process.env.SELF_URL) {
+    setInterval(() => {
+      fetch(`${url}/health`)
+        .then(() => console.log("✓ Keep-alive ping successful"))
+        .catch((err) =>
+          console.error("✗ Keep-alive ping failed:", err.message)
+        );
+    }, 10 * 60 * 1000); // Every 10 minutes
+    console.log("Keep-alive enabled: pinging every 10 minutes");
+  }
+}
+
 // Start server
 app.listen(PORT, () => {
   console.log(`
@@ -369,6 +384,9 @@ app.listen(PORT, () => {
   
   Ready to accept requests! 🚀
   `);
+
+  // Start keep-alive after server is up
+  keepAlive();
 });
 
 // Graceful shutdown
